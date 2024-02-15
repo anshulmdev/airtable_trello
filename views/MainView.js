@@ -6,7 +6,6 @@ import { globalConfig } from '@airtable/blocks';
 import secrets from "../secrets.json";
 import { Airtable } from "./Airtable";
 import { Trello } from "./Trello";
-import {TrelloOAuth} from "./Dialog";
 
 
 export const MainView = () => {
@@ -20,7 +19,6 @@ export const MainView = () => {
 
     return (
         <div>
-            <TrelloOAuth title = "Connection Issue" description = "Please complete Trello Connection with Airtable" />
             <Box style={{ "borderColor": secrets.REACT_THEME_DARK_COLOR, borderRadius: 5 }} border="default">
                 <Box marginTop={2} display="flex" justifyContent="flex-end" alignIt2ms="right">
                     <Text><b>{user.credits}: Credits</b></Text>

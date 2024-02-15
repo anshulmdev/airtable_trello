@@ -1,10 +1,11 @@
 import { initializeBlock, Loader, Box } from '@airtable/blocks/ui';
 import React, { useState, useEffect } from 'react';
 import { MainView } from "./MainView";
-import { setGlobalVariables } from "../controllers/globalConfig";
+import {TrelloOAuth} from "./Dialog";
 
 function HelloWorldApp() {
     const [data, updateData] = useState(true);
+    const [trelloToken, setToken] = useState(false);
     useEffect(() => {
         const getData = async () => {
             // const setInitialVariables = await setGlobalVariables();
@@ -14,6 +15,7 @@ function HelloWorldApp() {
       }, []);
 
     return <div>
+      {trelloToken ? <b> Working</b> : <TrelloOAuth title = "Connection Issue" description = "Please complete Trello Connection with Airtable" />}
         {data ? <MainView />: 
           <Box style={{
             paddingTop: "100px",
