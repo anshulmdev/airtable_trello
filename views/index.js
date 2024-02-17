@@ -6,12 +6,12 @@ import {TrelloOAuth} from "./Dialog";
 import {setGlobalVariables} from "../controllers/globalConfig";
 
 function HelloWorldApp() {
-    const [data, updateData] = useState();
+    const [data, updateData] = useState(true);
     const trelloToken = globalConfig.get("trelloToken");
     useEffect(() => {
         const getData = async () => {
-            const setInitialVariables = await setGlobalVariables();
-            updateData(setInitialVariables);
+            // const setInitialVariables = await setGlobalVariables();
+            // updateData(setInitialVariables);
         }
         getData();
       }, []);

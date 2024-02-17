@@ -1,22 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Text, Select, FieldPicker, Icon } from "@airtable/blocks/ui";
+import { getBoardList, getLists } from "../controllers/formFields"
 
 
 
 export const Trello = () => {
+    const [boardOptions, setBoardOptions] = useState([]);
+    const [listOptions, setListOptions] = useState([]);
+    const [board, setBoard] = useState();
+    const [list, setList] = useState();
+    
+    useEffect(() => {
+        const getBoards = async () => {
+            const boardList = await getBoardList();
+            const lists = await getLists(boardList[0].value);
+            setBoardOptions(boardList);
+            setBoard(boardList[0].value);
+            setListOptions(lists);
+            setList(lists[0].value)
+            return true
+        }
+        getBoards();
+        
+     }, [])
     const [field, setField] = useState(null);
-    const boardOptions = [
-        { value: "Ideas", label: "Ideas" },
-        { value: "Todo", label: "Todo" },
-        { value: "Banana", label: "Banana" }
-    ];
-    const listOptions = [
-        { value: "Progress", label: "Progress" },
-        { value: "Todo", label: "Todo" },
-        { value: "Banana", label: "Banana" }
-    ];
-    const [board, setBoard] = useState(boardOptions[0].value);
-    const [list, setList] = useState(listOptions[1].value);
+    
     return (
         <div>
 
