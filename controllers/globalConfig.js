@@ -44,6 +44,15 @@ const createNewUser = async (id, name, email) => {
 }
 
 
+
+export const storeToken = async (token) => {
+    const storeToken = await globalConfig.setAsync("trelloToken", token);
+    return storeToken;
+}
+
+
+
+
 export const setGlobalVariables = async () => {
     try {
         const collaborator = base.activeCollaborators[0];

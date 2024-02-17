@@ -21,7 +21,7 @@ export const MainView = () => {
         <div>
             <Box style={{ "borderColor": secrets.REACT_THEME_DARK_COLOR, borderRadius: 5 }} border="default">
                 <Box marginTop={2} display="flex" justifyContent="flex-end" alignIt2ms="right">
-                    <Text><b>{user.credits}: Credits</b></Text>
+                    <Text><b>{user ? user.credits : 0}: Credits</b></Text>
                     <Tooltip
                         content="Credits to use Einfach Excel Exporter"
                         placementX={Tooltip.placements.CENTER}
