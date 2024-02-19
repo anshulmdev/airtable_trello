@@ -4,7 +4,6 @@ import { Tooltip, ProgressBar, Text, Icon, FormField, Input, Box, Heading, Butto
 import { demoPayload } from "../controllers/getTable";
 import { globalConfig } from '@airtable/blocks';
 import secrets from "../secrets.json";
-import { Airtable } from "./Airtable";
 import { Trello } from "./Trello";
 
 
@@ -23,7 +22,7 @@ export const MainView = () => {
                 <Box marginTop={2} display="flex" justifyContent="flex-end" alignIt2ms="right">
                     <Text><b>{user ? user.credits : 0}: Credits</b></Text>
                     <Tooltip
-                        content="Credits to use Einfach Excel Exporter"
+                        content="Einfach Application Credits to use Einfach Apps"
                         placementX={Tooltip.placements.CENTER}
                         placementY={Tooltip.placements.BOTTOM}
                         shouldHideTooltipOnClick={true}
@@ -32,14 +31,13 @@ export const MainView = () => {
 
                     </Tooltip>
                 </Box>
-                <Airtable />
                 <Trello />
                 <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
                     <Button
                         style={{
                             "backgroundColor": secrets.REACT_THEME_DARK_COLOR
                         }}
-                     flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
+                        flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
                         Create Cards in Trello
                     </Button>
                 </Box>
@@ -69,7 +67,7 @@ export const MainView = () => {
                             {ErrorDialogOpen}
                         </Text>
                         <Box paddingTop={3} display="flex">
-                        <Button style={{
+                            <Button style={{
                                 "backgroundColor": secrets.REACT_THEME_DARK_COLOR
                             }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setErrorDialogOpen(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
                             <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setErrorDialogOpen(false)}>Close</Button>

@@ -5,7 +5,7 @@ import secrets from "../secrets.json";
 const trelloToken = globalConfig.get("trelloToken");
 
 export const getBoardList = async () => {
-    const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${secrets.TRELLO_TOKEN}`;
+    const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${trelloToken}`;
     const trelloData = await fetch(url);
     const response = await trelloData.json();
     const filteredData = [];
@@ -17,7 +17,7 @@ export const getBoardList = async () => {
 
 
 export const getLists = async (boardId) => {
-    const url = `https://api.trello.com/1/boards/${boardId}/lists?key=${secrets.TRELLO_API_KEY}&token=${secrets.TRELLO_TOKEN}`;
+    const url = `https://api.trello.com/1/boards/${boardId}/lists?key=${secrets.TRELLO_API_KEY}&token=${trelloToken}`;
     const trelloData = await fetch(url);
     const response = await trelloData.json();
     const filteredData = [];
@@ -28,16 +28,10 @@ export const getLists = async (boardId) => {
     return filteredData
 }
 
-export const fields = async () => {
-    const tableId = globalConfig.get("table");
-    const viewId = globalConfig.get("view");
-    const table = base.getTableById(tableId);
-    const view = table.getViewById(viewId);
+export const fields = async (view) => {
     const viewMetadata = view.selectMetadata();
     await viewMetadata.loadDataAsync();
     const fields = viewMetadata.visibleFields;
-    console.log(table.name)
-
     const titleOptions = [];
     const descriptionOptions = [];
     const dateOptions = [];

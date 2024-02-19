@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { base, globalConfig } from '@airtable/blocks';
 import { Box, TablePicker, ViewPicker, Text, Icon } from "@airtable/blocks/ui";
-import { fields  } from "../controllers/formFields"
 
 
 
