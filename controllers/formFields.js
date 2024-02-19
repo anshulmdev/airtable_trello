@@ -1,4 +1,4 @@
-import { globalConfig } from '@airtable/blocks';
+import { base, globalConfig } from '@airtable/blocks';
 import secrets from "../secrets.json";
 
 
@@ -28,6 +28,30 @@ export const getLists = async (boardId) => {
     return filteredData
 }
 
-export const fields = async (view) => {
+export const fields = async () => {
+    const tableId = globalConfig.get("table");
+    const viewId = globalConfig.get("view");
+    const table = base.getTableById(tableId);
+    const view = table.getViewById(viewId);
+    const viewMetadata = view.selectMetadata();
+    await viewMetadata.loadDataAsync();
+    const fields = viewMetadata.visibleFields;
+    console.log(table.name)
+
+    const titleOptions = [];
+    const descriptionOptions = [];
+    const dateOptions = [];
+    const labels = [];
+    const attachments = [];
+
+    fields.forEach((e) => {
+        const record = {value: e.id, label: e.name};
+        if (["singleLineText", "singleSelect", "multilineText"].includes(e.type)) { titleOptions.push(record); descriptionOptions.push(record)};
+        if (["singleSelect", "multipleSelects"].includes(e.type)) {labels.push(record)};
+        if (["date"].includes(e.type)) {dateOptions.push(record)};
+        if (["multipleAttachments"].includes(e.type)) {attachments.push(record)};
+    })
+    return {titleOptions, descriptionOptions, dateOptions, labels, attachments}
+
 
 }

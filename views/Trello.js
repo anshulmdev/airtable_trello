@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Text, Select, FieldPicker, Icon } from "@airtable/blocks/ui";
-import { getBoardList, getLists } from "../controllers/formFields"
+import { getBoardList, getLists, fields } from "../controllers/formFields"
 
 
 
@@ -9,7 +9,16 @@ export const Trello = () => {
     const [listOptions, setListOptions] = useState([]);
     const [board, setBoard] = useState();
     const [list, setList] = useState();
-    
+    const [fieldOptions, setFieldOptions] = useState({titleOptions: [], descriptionOptions: [], dateOptions: [], labels: [], attachments:[]});
+
+    const [title, setTitle] = useState();
+    const [desc, setDesc] = useState();
+    const [startDate, setStartDate] = useState();
+    const [endDate, setEndDate] = useState();
+    const [label, setLabel] = useState();
+    const [attachment, setAttachment] = useState();
+
+
     useEffect(() => {
         const getBoards = async () => {
             const boardList = await getBoardList();
@@ -17,13 +26,27 @@ export const Trello = () => {
             setBoardOptions(boardList);
             setBoard(boardList[0].value);
             setListOptions(lists);
-            setList(lists[0].value)
+            setList(lists[0].value);
             return true
         }
+        const getFields = async () => {
+            const fieldOptions = await fields();
+            console.log({fieldOptions})
+            setFieldOptions(fieldOptions);
+            const {titleOptions, descriptionOptions, dateOptions, labels, attachments} = fieldOptions;
+            if (titleOptions.length) setTitle(titleOptions[0].value);
+            if (descriptionOptions.length) setDesc(descriptionOptions[0].value);
+            if (dateOptions.length) setStartDate(dateOptions[0].value);
+            if (dateOptions.length) setEndDate(dateOptions[0].value);
+            if (labels.length) setLabel(labels[0].value);
+            if (attachments.length) setAttachment(attachments[0].value);
+            return true;
+        }
+        
         getBoards();
+        getFields();
         
      }, [])
-    const [field, setField] = useState(null);
     
     return (
         <div>
@@ -72,16 +95,16 @@ export const Trello = () => {
             <Box display="flex">
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={boardOptions}
-                    value={board}
-                    onChange={newValue => setBoard(newValue)}
+                    options={fieldOptions.titleOptions}
+                    value={title}
+                    onChange={newValue => setTitle(newValue)}
                     width="320px"
                 />
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={listOptions}
-                    value={list}
-                    onChange={newValue => setList(newValue)}
+                    options={fieldOptions.descriptionOptions}
+                    value={desc}
+                    onChange={newValue => setDesc(newValue)}
                     width="320px"
                 />
             </Box>
@@ -98,16 +121,16 @@ export const Trello = () => {
             <Box display="flex">
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={boardOptions}
-                    value={board}
-                    onChange={newValue => setBoard(newValue)}
+                    options={fieldOptions.dateOptions}
+                    value={startDate}
+                    onChange={newValue => setStartDate(newValue)}
                     width="320px"
                 />
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={listOptions}
-                    value={list}
-                    onChange={newValue => setList(newValue)}
+                    options={fieldOptions.dateOptions}
+                    value={endDate}
+                    onChange={newValue => setEndDate(newValue)}
                     width="320px"
                 />
             </Box>
@@ -124,16 +147,16 @@ export const Trello = () => {
             <Box display="flex">
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={boardOptions}
-                    value={board}
-                    onChange={newValue => setBoard(newValue)}
+                    options={fieldOptions.labels}
+                    value={label}
+                    onChange={newValue => setLabel(newValue)}
                     width="320px"
                 />
                 <Select
                     flex={1} justifyContent='flex-start' marginX={3}
-                    options={listOptions}
-                    value={list}
-                    onChange={newValue => setList(newValue)}
+                    options={fieldOptions.attachments}
+                    value={attachment}
+                    onChange={newValue => setAttachment(newValue)}
                     width="320px"
                 />
             </Box>

@@ -1,12 +1,28 @@
 import React, { useState } from "react";
-import { base } from '@airtable/blocks';
+import { base, globalConfig } from '@airtable/blocks';
 import { Box, TablePicker, ViewPicker, Text, Icon } from "@airtable/blocks/ui";
+import { fields  } from "../controllers/formFields"
 
 
 
 export const Airtable = () => {
     const [table, setTable] = useState(base.tables[0]);
     const [view, setView] = useState(table.views[0]);
+    globalConfig.setAsync("table", table.id);
+    globalConfig.setAsync("view", view.id);
+
+    const setRecord = async(update, value) => {
+        if (update==="table") {
+            await setTable(value);
+            await setView(value.views[0]);
+            await globalConfig.setAsync("view",value.views[0].id)
+        }
+        if (update === "view") {
+            await setView(value);
+            await globalConfig.setAsync("view",value.id) 
+        }
+        return true
+    }
     return (
         <div>
             <Box  style={{'borderStyle': 'dashed', 'borderRadius': 1, 'borderWidth': 1}} margin={2} paddingY={2}>
@@ -25,14 +41,14 @@ export const Airtable = () => {
             <Box display="flex" paddingBottom={2}>
                 <TablePicker flex={1} justifyContent='flex-start' marginX={3}
                     table={table}
-                    onChange={newTable => { setTable(newTable); setView(newTable.views[0]);}}
+                    onChange={newTable => { setRecord("table", newTable)}}
                     width="320px"
                 />
                 <ViewPicker
                     flex={1} justifyContent='flex-start' marginX={3}
                     table={table}
                     view={view}
-                    onChange={newView => { setView(newView);}}
+                    onChange={newView => { setRecord("view", newView) }}
                     width="320px"
                 />
             </Box>
