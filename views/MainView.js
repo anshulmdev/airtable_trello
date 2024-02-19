@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base } from '@airtable/blocks';
-import { Tooltip, ProgressBar, Text, Icon, FormField, Input, Box, Heading, Button, Dialog } from "@airtable/blocks/ui";
+import { Tooltip, ProgressBar, Text, Icon, Box, Heading, Button, Dialog } from "@airtable/blocks/ui";
 import { demoPayload } from "../controllers/getTable";
 import { globalConfig } from '@airtable/blocks';
 import secrets from "../secrets.json";
@@ -9,7 +9,6 @@ import { Trello } from "./Trello";
 
 export const MainView = () => {
     const [progress, setProgress] = useState(0.0);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [ErrorDialogOpen, setErrorDialogOpen] = useState(false);
     const collaborator = base.activeCollaborators[0];
     const { id } = collaborator;
@@ -32,33 +31,8 @@ export const MainView = () => {
                     </Tooltip>
                 </Box>
                 <Trello />
-                <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
-                    <Button
-                        style={{
-                            "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                        }}
-                        flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
-                        Create Cards in Trello
-                    </Button>
-                </Box>
                 <Box display="flex" alignItems="center" padding={3} marginBottom={2}>
                 </Box>
-                {isDialogOpen && (
-                    <Dialog onClose={() => viewRowCount(view)} width="320px">
-                        <Dialog.CloseButton />
-                        <Heading>Confirm Operation</Heading>
-                        <Text variant="paragraph">
-                            You are about to use {rows} credits for {rows} rows in this operation. Would you like to proceed?
-                        </Text>
-                        <Box paddingTop={3} display="flex">
-                            <Button style={{
-                                "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                            }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); demoPayload(table, value, view, setProgress, rows, setErrorDialogOpen) }}>Proceed</Button>
-                            <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(false)}>Close</Button>
-
-                        </Box>
-                    </Dialog>
-                )}
                 {ErrorDialogOpen && (
                     <Dialog onClose={() => viewRowCount(view)} width="320px">
                         <Dialog.CloseButton />

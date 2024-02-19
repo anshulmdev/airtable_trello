@@ -29,9 +29,13 @@ export const getLists = async (boardId) => {
 }
 
 export const fields = async (view) => {
+    const queryResult = view.selectRecords();
+    await queryResult.loadDataAsync();
+
     const viewMetadata = view.selectMetadata();
     await viewMetadata.loadDataAsync();
     const fields = viewMetadata.visibleFields;
+    const rows = queryResult.records.length;
     const titleOptions = [];
     const descriptionOptions = [];
     const dateOptions = [];
@@ -45,7 +49,7 @@ export const fields = async (view) => {
         if (["date"].includes(e.type)) {dateOptions.push(record)};
         if (["multipleAttachments"].includes(e.type)) {attachments.push(record)};
     })
-    return {titleOptions, descriptionOptions, dateOptions, labels, attachments}
+    return {titleOptions, descriptionOptions, dateOptions, labels, attachments, rows}
 
 
 }

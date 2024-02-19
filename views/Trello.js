@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { base, globalConfig } from '@airtable/blocks';
-import { Box, Text, Select, Icon, TablePicker, ViewPicker } from "@airtable/blocks/ui";
+import { Box, Text, Select, Icon, TablePicker, ViewPicker, Button, Dialog, Heading  } from "@airtable/blocks/ui";
 import { getBoardList, getLists, fields } from "../controllers/formFields"
+
+import secrets from "../secrets.json";
 
 
 
 export const Trello = () => {
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [table, setTable] = useState(base.tables[0]);
     const [view, setView] = useState(table.views[0]);
     globalConfig.setAsync("table", table.id);
@@ -22,6 +25,7 @@ export const Trello = () => {
     const [endDate, setEndDate] = useState();
     const [label, setLabel] = useState();
     const [attachment, setAttachment] = useState();
+    const [rows, setRows] = useState(0);
 
     const setRecord = async (update, value) => {
         if (update === "table") {
@@ -40,7 +44,8 @@ export const Trello = () => {
     const getFields = async (view) => {
         const fieldOptions = await fields(view);
         setFieldOptions(fieldOptions);
-        const { titleOptions, descriptionOptions, dateOptions, labels, attachments } = fieldOptions;
+        const { titleOptions, descriptionOptions, dateOptions, labels, attachments, rows } = fieldOptions;
+        setRows(rows);
         if (titleOptions.length) setTitle(titleOptions[0].value);
         if (descriptionOptions.length) setDesc(descriptionOptions[0].value);
         if (dateOptions.length) setStartDate(dateOptions[0].value);
@@ -206,6 +211,33 @@ export const Trello = () => {
                         />
                     </Box>
                 </Box>
+
+                <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
+                    <Button
+                        style={{
+                            "backgroundColor": secrets.REACT_THEME_DARK_COLOR
+                        }}
+                        flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
+                        Create Cards in Trello
+                    </Button>
+                </Box>
+
+                {isDialogOpen && (
+                    <Dialog onClose={() => viewRowCount(view)} width="320px">
+                        <Dialog.CloseButton />
+                        <Heading>Confirm Operation</Heading>
+                        <Text variant="paragraph">
+                            You are about to use {rows} credits for {rows} rows in this operation. Would you like to proceed?
+                        </Text>
+                        <Box paddingTop={3} display="flex">
+                            <Button style={{
+                                "backgroundColor": secrets.REACT_THEME_DARK_COLOR
+                            }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); demoPayload(table, value, view, setProgress, rows, setErrorDialogOpen) }}>Proceed</Button>
+                            <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(false)}>Close</Button>
+
+                        </Box>
+                    </Dialog>
+                )}
             </Box>
         </div>
     )
