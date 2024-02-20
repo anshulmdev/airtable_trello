@@ -31,17 +31,18 @@ const getLabelIds = async (board, airtableLabels) => {
 
 }
 
-const trelloPost = async (cardsData, board, list, setProgress) => {
-  console.log(cardsData)
+const trelloPost = async (cardsData, board, list, setProgress, credits) => {
   const url = `https://api.trello.com/1/cards?idList=${list}&key=${key}&token=${token}`;
-  setProgress(0.8);
+  setProgress(0.30);
+  let counter = 0.3;
+  let rangeCounter = parseInt(6/credits);
 
-  await Promise.all(cardsData.map(async (element) => {
+  cardsData.map(async (element) => {
     const body = { name: element.name, desc: element.desc, start: element.start, due: element.due};
     if (element.label) body["idLabels"] = await getLabelIds(board, element.label);
     const cardReq = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const cardRes = await cardReq.json();
-    if (!element.attachment.length) {
+    if (element.attachment) {
       const cardId = cardRes.id;
       const attachmentUrl = `https://api.trello.com/1/cards/${cardId}/attachments?key=${key}&token=${token}`
       for (let file of element.attachment) {
@@ -49,8 +50,9 @@ const trelloPost = async (cardsData, board, list, setProgress) => {
         const attachmentReq = await fetch(attachmentUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(attachmentBody) });
       }
     }
-    console.log(cardRes);
-  }))
+    counter = counter + rangeCounter;
+    await setProgress(counter);
+  })
 
   setProgress(1.0);
   return true
@@ -58,10 +60,10 @@ const trelloPost = async (cardsData, board, list, setProgress) => {
 
 
 export const writeToTrello = async (cardsData, setProgress, credits, board, list) => {
-  await setProgress(0.3);
+  await setProgress(0.08);
   const creditReduction = await reduceCredits(credits, setProgress);
-  await setProgress(0.7);
-  if (creditReduction) await trelloPost(cardsData, board, list, setProgress);
+  await setProgress(0.25);
+  if (creditReduction) await trelloPost(cardsData, board, list, setProgress, credits);
   else throw new error(creditReduction);
   await setProgress(0.0)
   return true;

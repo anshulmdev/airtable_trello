@@ -44,7 +44,7 @@ export const fields = async (view) => {
     fields.forEach((e) => {
         const record = {value: e.id, label: e.name};
         if (["singleLineText", "singleSelect", "multilineText"].includes(e.type)) { titleOptions.push(record); descriptionOptions.push(record)};
-        if (["singleSelect", "multipleSelects"].includes(e.type)) {labels.push(record)};
+        if (["multipleSelects"].includes(e.type)) {labels.push(record)};
         if (["date"].includes(e.type)) {dateOptions.push(record)};
         if (["multipleAttachments"].includes(e.type)) {attachments.push(record)};
     })

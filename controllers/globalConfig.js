@@ -79,7 +79,7 @@ export const reduceCredits = async (creditsToReduce, setProgress) => {
         const userInfo = await getData(id);
         const { email, name, credits } = userInfo;
         let NewCredits = credits - creditsToReduce;
-        await setProgress(0.4);
+        await setProgress(0.1);
         if (NewCredits < 0) throw new Error ("You don't have suffiecient credits for this operation. Please contact to upgrade")
         const data = {
             "operation": "create",
@@ -93,9 +93,9 @@ export const reduceCredits = async (creditsToReduce, setProgress) => {
             mode: 'no-cors',
             body: JSON.stringify(data)
         })
-        await setProgress(0.5);
+        await setProgress(0.15);
         await setGlobalVariables();
-        await setProgress(0.6);
+        await setProgress(0.20);
         return true;
 
 

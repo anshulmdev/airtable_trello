@@ -59,6 +59,12 @@ export const MainView = () => {
         return true;
     }
 
+    const getList = async (boardId) => {
+        const lists = await getLists(boardId);
+        setListOptions(lists);
+        setList(lists[0].value);
+    }
+
     useEffect(() => {
         const getBoards = async () => {
             const boardList = await getBoardList();
@@ -140,7 +146,7 @@ export const MainView = () => {
                             flex={1} justifyContent='flex-start' marginX={3}
                             options={boardOptions}
                             value={board}
-                            onChange={newValue => setBoard(newValue)}
+                            onChange={newValue => {setBoard(newValue); getList(newValue);}}
                             width="320px"
                         />
                         <Select

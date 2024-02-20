@@ -2,7 +2,7 @@ import {writeToTrello} from "./trelloCards"
 
 
 export const createCards = async (view, setProgress, credits, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment) => {
-    await setProgress(0.1);
+    await setProgress(0.01);
     try {
         const queryResult = view.selectRecords();
         await queryResult.loadDataAsync();
@@ -14,6 +14,7 @@ export const createCards = async (view, setProgress, credits, setErrorDialogOpen
         tableRecords.records.forEach(element => {
             records.push(element._data.cellValuesByFieldId)
         });
+        await setProgress(0.02);
         records.forEach((e) => {
             const card = {};
             if (e[title]) card["name"] = e[title];
@@ -24,6 +25,7 @@ export const createCards = async (view, setProgress, credits, setErrorDialogOpen
             if (e[label]) card["label"] = e[label];
             cardsData.push(card)
         })
+        await setProgress(0.03);
 
         await writeToTrello(cardsData, setProgress, credits, board, list);
         return true;
