@@ -47,7 +47,7 @@ const trelloPost = async (cardsData, board, list, setProgress, credits) => {
       const attachmentUrl = `https://api.trello.com/1/cards/${cardId}/attachments?key=${key}&token=${token}`
       for (let file of element.attachment) {
         const attachmentBody = { name: file.filename, url: file.url }
-        const attachmentReq = await fetch(attachmentUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(attachmentBody) });
+        await fetch(attachmentUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(attachmentBody) });
       }
     }
     counter = counter + rangeCounter;

@@ -87,7 +87,10 @@ export const MainView = () => {
     return (
         <div>
             <Box style={{ "borderColor": secrets.REACT_THEME_DARK_COLOR, borderRadius: 5 }} border="default">
-                <Box marginTop={2} display="flex" justifyContent="flex-end" alignIt2ms="right">
+                <Box marginTop={2}>
+            {progress === 0.0 ? <div></div> : <Box marginLeft={2}><b>Progress: {parseFloat(progress).toFixed(4) * 10} %</b></Box>}
+            
+                <Box display="flex" justifyContent="flex-end" alignIt2ms="right">
                     <Text><b>{user ? user.credits : 0}: Credits</b></Text>
                     <Tooltip
                         content="Einfach Application Credits to use Einfach Apps"
@@ -98,7 +101,7 @@ export const MainView = () => {
                         <Icon marginX={2} name="help" size={16} />
 
                     </Tooltip>
-                </Box>
+                </Box></Box>
 
                 <Box style={{ 'borderStyle': 'dashed', 'borderRadius': 1, 'borderWidth': 1 }} margin={2} paddingY={2}>
                     <Box display="flex" alignItems="center" paddingX={3} paddingBottom={1} paddingTop={2}>

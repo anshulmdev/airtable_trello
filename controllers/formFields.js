@@ -42,7 +42,7 @@ export const fields = async (view) => {
 
     fields.forEach((e) => {
         const record = {value: e.id, label: e.name};
-        if (e.type === "singleLineText" || e.type === "singleSelect" || e.type === "multilineText") { titleOptions.push(record); descriptionOptions.push(record)};
+        if (e.type === "singleLineText" || e.type === "multilineText") { titleOptions.push(record); descriptionOptions.push(record)};
         if (e.type === "multipleSelects") {labels.push(record)};
         if (e.type === "date") {dateOptions.push(record)};
         if (e.type === "multipleAttachments") {attachments.push(record)};
