@@ -3,30 +3,67 @@ import { globalConfig } from '@airtable/blocks';
 import { reduceCredits } from "./globalConfig";
 import secrets from "../secrets.json";
 
+const key = secrets.TRELLO_API_KEY;
+const token = globalConfig.get("trelloToken");
 
+
+const getLabelIds = async (board, airtableLabels) => {
+  const labelUrl = `https://api.trello.com/1/boards/${board}/labels?key=${key}&token=${token}`
+  const labelDataReq = await fetch(labelUrl);
+  const labelDataRes = await labelDataReq.json();
+  const boardLabels = {};
+  labelDataRes.map((e) => boardLabels[e.name] = e.id);
+  const createLabel = async (name) => {
+    const createLabelUrl = `https://api.trello.com/1/labels?name=${name}&color=blue&idBoard=${board}&key=${key}&token=${token}`
+    const createLabel = await fetch(createLabelUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }})
+    const labelResponse = await createLabel.json();
+    return labelResponse.id;
+  }
+  const finalLabelIDs = []
+  for (let element of airtableLabels){
+    if (boardLabels[element.name]) {
+      finalLabelIDs.push(boardLabels[element.name])
+    } else {
+      finalLabelIDs.push(await createLabel(element.name))
+    }
+  };
+  return finalLabelIDs
+
+}
 
 const trelloPost = async (cardsData, board, list, setProgress) => {
-    const key = secrets.TRELLO_API_KEY;
-    const token = globalConfig.get("trelloToken");
-    const url = `https://api.trello.com/1/cards?idList=${list}&key=${key}&token=${token}`;
-    setProgress(0.8);
+  console.log(cardsData)
+  const url = `https://api.trello.com/1/cards?idList=${list}&key=${key}&token=${token}`;
+  setProgress(0.8);
 
-    await Promise.all(cardsData.map(async (element) => { 
-        await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(element)});
-      }))
+  await Promise.all(cardsData.map(async (element) => {
+    const body = { name: element.name, desc: element.desc, start: element.start, due: element.due};
+    if (element.label) body["idLabels"] = await getLabelIds(board, element.label);
+    const cardReq = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const cardRes = await cardReq.json();
+    if (!element.attachment.length) {
+      const cardId = cardRes.id;
+      const attachmentUrl = `https://api.trello.com/1/cards/${cardId}/attachments?key=${key}&token=${token}`
+      for (let file of element.attachment) {
+        const attachmentBody = { name: file.filename, url: file.url }
+        const attachmentReq = await fetch(attachmentUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(attachmentBody) });
+      }
+    }
+    console.log(cardRes);
+  }))
 
-    setProgress(1.0);
-    return true
+  setProgress(1.0);
+  return true
 }
 
 
 export const writeToTrello = async (cardsData, setProgress, credits, board, list) => {
-        await setProgress(0.3);
-        const creditReduction = await reduceCredits(credits, setProgress);
-        await setProgress(0.7);
-        if (creditReduction) await trelloPost(cardsData, board, list, setProgress);
-        else throw new error(creditReduction);
-        await setProgress(0.0)
-        return true;
-   
+  await setProgress(0.3);
+  const creditReduction = await reduceCredits(credits, setProgress);
+  await setProgress(0.7);
+  if (creditReduction) await trelloPost(cardsData, board, list, setProgress);
+  else throw new error(creditReduction);
+  await setProgress(0.0)
+  return true;
+
 }

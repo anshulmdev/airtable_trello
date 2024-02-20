@@ -20,6 +20,8 @@ export const createCards = async (view, setProgress, credits, setErrorDialogOpen
             if (e[desc]) card["desc"] = e[desc];
             if (e[startDate]) card ["start"] = e[startDate];
             if (e[endDate]) card["due"] = e[endDate]
+            if (e[attachment]) card["attachment"] = e[attachment];
+            if (e[label]) card["label"] = e[label];
             cardsData.push(card)
         })
 

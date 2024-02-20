@@ -71,7 +71,7 @@ export const MainView = () => {
         }
 
         getBoards();
-        //getFields(view);
+        getFields(view);
 
     }, [])
 
