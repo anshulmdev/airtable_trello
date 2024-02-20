@@ -30,7 +30,6 @@ export const getLists = async (boardId) => {
 export const fields = async (view) => {
     const queryResult = view.selectRecords();
     await queryResult.loadDataAsync();
-
     const viewMetadata = view.selectMetadata();
     await viewMetadata.loadDataAsync();
     const fields = viewMetadata.visibleFields;
@@ -43,10 +42,10 @@ export const fields = async (view) => {
 
     fields.forEach((e) => {
         const record = {value: e.id, label: e.name};
-        if (["singleLineText", "singleSelect", "multilineText"].includes(e.type)) { titleOptions.push(record); descriptionOptions.push(record)};
-        if (["multipleSelects"].includes(e.type)) {labels.push(record)};
-        if (["date"].includes(e.type)) {dateOptions.push(record)};
-        if (["multipleAttachments"].includes(e.type)) {attachments.push(record)};
+        if (e.type === "singleLineText" || e.type === "singleSelect" || e.type === "multilineText") { titleOptions.push(record); descriptionOptions.push(record)};
+        if (e.type === "multipleSelects") {labels.push(record)};
+        if (e.type === "date") {dateOptions.push(record)};
+        if (e.type === "multipleAttachments") {attachments.push(record)};
     })
     return {titleOptions, descriptionOptions, dateOptions, labels, attachments, rows}
 
