@@ -239,11 +239,12 @@ export const MainView = () => {
 
                 <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
                     <Button
+                        disabled = {progress!=0.0}
                         style={{
                             "backgroundColor": secrets.REACT_THEME_DARK_COLOR
                         }}
                         flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
-                        Create Cards in Trello
+                        {progress===0.0 ? <div>Create Cards in Trello</div> : <div>Operation Ongoing, Please Wait....</div>}
                     </Button>
                 </Box>
 

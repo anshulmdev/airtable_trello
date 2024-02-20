@@ -54,7 +54,7 @@ const trelloPost = async (cardsData, board, list, setProgress, credits) => {
     await setProgress(counter);
   })
 
-  setProgress(1.0);
+  setProgress(0.9);
   return true
 }
 
