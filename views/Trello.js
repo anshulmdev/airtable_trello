@@ -1,30 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { base, globalConfig } from '@airtable/blocks';
-import { Box, Text, Select, Icon, TablePicker, ViewPicker, Button, Dialog, Heading  } from "@airtable/blocks/ui";
+import { Box, Text, Select, Icon, TablePicker, ViewPicker, Button, Dialog, Heading, ProgressBar  } from "@airtable/blocks/ui";
 import { getBoardList, getLists, fields } from "../controllers/formFields"
+import { createCards } from "../controllers/trelloHandler";
 
 import secrets from "../secrets.json";
 
 
 
 export const Trello = () => {
+    const sample = {value:1, label: "sample"};
+    const [progress, setProgress] = useState(0.0);
+    const [ErrorDialogOpen, setErrorDialogOpen] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [table, setTable] = useState(base.tables[0]);
     const [view, setView] = useState(table.views[0]);
     globalConfig.setAsync("table", table.id);
     globalConfig.setAsync("view", view.id);
-    const [boardOptions, setBoardOptions] = useState([]);
-    const [listOptions, setListOptions] = useState([]);
-    const [board, setBoard] = useState();
-    const [list, setList] = useState();
-    const [fieldOptions, setFieldOptions] = useState({ titleOptions: [], descriptionOptions: [], dateOptions: [], labels: [], attachments: [] });
-
-    const [title, setTitle] = useState();
-    const [desc, setDesc] = useState();
-    const [startDate, setStartDate] = useState();
-    const [endDate, setEndDate] = useState();
-    const [label, setLabel] = useState();
-    const [attachment, setAttachment] = useState();
+    const [boardOptions, setBoardOptions] = useState([sample]);
+    const [listOptions, setListOptions] = useState([sample]);
+    const [board, setBoard] = useState(sample.value);
+    const [list, setList] = useState(sample.value);
+    const [fieldOptions, setFieldOptions] = useState({ titleOptions: [sample], descriptionOptions: [sample], dateOptions: [sample], labels: [sample], attachments: [sample] });
+    const [title, setTitle] = useState(sample.value);
+    const [desc, setDesc] = useState(sample.value);
+    const [startDate, setStartDate] = useState(sample.value);
+    const [endDate, setEndDate] = useState(sample.value);
+    const [label, setLabel] = useState(sample.value);
+    const [attachment, setAttachment] = useState(sample.value);
     const [rows, setRows] = useState(0);
 
     const setRecord = async (update, value) => {
@@ -43,9 +46,9 @@ export const Trello = () => {
     }
     const getFields = async (view) => {
         const fieldOptions = await fields(view);
-        setFieldOptions(fieldOptions);
         const { titleOptions, descriptionOptions, dateOptions, labels, attachments, rows } = fieldOptions;
         setRows(rows);
+        setFieldOptions(fieldOptions);
         if (titleOptions.length) setTitle(titleOptions[0].value);
         if (descriptionOptions.length) setDesc(descriptionOptions[0].value);
         if (dateOptions.length) setStartDate(dateOptions[0].value);
@@ -67,7 +70,7 @@ export const Trello = () => {
         }
 
         getBoards();
-        getFields(view);
+        //getFields(view);
 
     }, [])
 
@@ -222,6 +225,10 @@ export const Trello = () => {
                     </Button>
                 </Box>
 
+                <ProgressBar
+                    progress={progress}
+                    barColor={secrets.REACT_THEME_LIGHT_COLOR}
+                />
                 {isDialogOpen && (
                     <Dialog onClose={() => viewRowCount(view)} width="320px">
                         <Dialog.CloseButton />
@@ -232,9 +239,25 @@ export const Trello = () => {
                         <Box paddingTop={3} display="flex">
                             <Button style={{
                                 "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                            }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); demoPayload(table, value, view, setProgress, rows, setErrorDialogOpen) }}>Proceed</Button>
+                            }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); createCards(view, setProgress, rows, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment) }}>Proceed</Button>
                             <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(false)}>Close</Button>
 
+                        </Box>
+                    </Dialog>
+                )}
+
+{ErrorDialogOpen && (
+                    <Dialog onClose={() => viewRowCount(view)} width="320px">
+                        <Dialog.CloseButton />
+                        <Heading>⚠️ Error in Operation</Heading>
+                        <Text variant="paragraph">
+                            {ErrorDialogOpen}
+                        </Text>
+                        <Box paddingTop={3} display="flex">
+                            <Button style={{
+                                "backgroundColor": secrets.REACT_THEME_DARK_COLOR
+                            }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setErrorDialogOpen(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
+                            <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setErrorDialogOpen(false)}>Close</Button>
                         </Box>
                     </Dialog>
                 )}

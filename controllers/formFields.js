@@ -24,7 +24,6 @@ export const getLists = async (boardId) => {
     response.forEach(element => {
         filteredData.push({value: element.id, label: element.name})
     });
-    console.log(filteredData)
     return filteredData
 }
 
