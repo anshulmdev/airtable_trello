@@ -33,11 +33,11 @@ const getLabelIds = async (board, airtableLabels) => {
 
 const trelloPost = async (cardsData, board, list, setProgress, credits) => {
   const url = `https://api.trello.com/1/cards?idList=${list}&key=${key}&token=${token}`;
-  setProgress(0.30);
+  await setProgress(0.30);
   let counter = 0.3;
-  let rangeCounter = parseInt(6/credits);
+  let rangeCounter = 0.6/credits;
 
-  cardsData.map(async (element) => {
+  for (let element of cardsData ) {
     const body = { name: element.name, desc: element.desc, start: element.start, due: element.due};
     if (element.label) body["idLabels"] = await getLabelIds(board, element.label);
     const cardReq = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -52,9 +52,9 @@ const trelloPost = async (cardsData, board, list, setProgress, credits) => {
     }
     counter = counter + rangeCounter;
     await setProgress(counter);
-  })
+  }
 
-  setProgress(0.9);
+  await setProgress(0.9);
   return true
 }
 

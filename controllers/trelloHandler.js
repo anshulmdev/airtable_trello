@@ -28,6 +28,7 @@ export const createCards = async (view, setProgress, credits, setErrorDialogOpen
         await setProgress(0.03);
 
         await writeToTrello(cardsData, setProgress, credits, board, list);
+        await setProgress(0.0);
         return true;
 
     } catch (error) {
