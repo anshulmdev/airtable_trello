@@ -1,7 +1,7 @@
 import {writeToTrello} from "./trelloCards"
 
 
-export const createCards = async (view, setProgress, credits, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment) => {
+export const createCards = async (view, setProgress, credits, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment, setSuccessDialog) => {
     await setProgress(0.01);
     try {
         const queryResult = view.selectRecords();
@@ -29,6 +29,7 @@ export const createCards = async (view, setProgress, credits, setErrorDialogOpen
 
         await writeToTrello(cardsData, setProgress, credits, board, list);
         await setProgress(0.0);
+        await setSuccessDialog(true)
         return true;
 
     } catch (error) {

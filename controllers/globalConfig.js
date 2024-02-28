@@ -45,9 +45,17 @@ const createNewUser = async (id, name, email) => {
 
 
 
-export const storeToken = async (token) => {
-    const storeToken = await globalConfig.setAsync("trelloToken", token);
-    return storeToken;
+export const storeToken = async (token, setIsDialogOpen) => {
+    const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
+    const trelloData = await fetch(url);
+    if ( trelloData.status === 200 ) {
+        const response = await trelloData.json();
+        const storeToken = await globalConfig.setAsync("trelloToken", token);
+        return storeToken;
+    } else {
+        await setIsDialogOpen(true)
+        return false;
+    }
 }
 
 
@@ -80,6 +88,7 @@ export const reduceCredits = async (creditsToReduce, setProgress) => {
         const { email, name, credits } = userInfo;
         let NewCredits = credits - creditsToReduce;
         await setProgress(0.1);
+        if (creditsToReduce > 100) throw new Error("The application can only transfer up to 100 records at a time. Please use filters to reduce the number of records you're trying to transfer.")
         if (NewCredits < 0) throw new Error ("You don't have suffiecient credits for this operation. Please contact to upgrade")
         const data = {
             "operation": "create",

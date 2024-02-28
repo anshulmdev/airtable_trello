@@ -13,6 +13,7 @@ export const MainView = () => {
     const sample = { value: false, label: false };
     const [progress, setProgress] = useState(0.0);
     const [ErrorDialogOpen, setErrorDialogOpen] = useState(false);
+    const [successDialogOpen, setSuccessDialog] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [table, setTable] = useState(base.tables[0]);
     const [view, setView] = useState(table.views[0]);
@@ -114,7 +115,7 @@ export const MainView = () => {
                     </Box>
                     <Box marginY={1} marginTop={2} display="flex">
                         <Text as={'p'} marginX={3} flex={1} justifyContent='flex-start'>Select Base Table Source</Text>
-                        <Text marginX={3} flex={1} justifyContent='flex-end'>Select filtered view from which Trello Cards have to be created</Text>
+                        <Text marginX={3} flex={1} justifyContent='flex-end'>Select Filtered View Source</Text>
                     </Box>
                     <Box display="flex" paddingBottom={2}>
                         <TablePicker flex={1} justifyContent='flex-start' marginX={3}
@@ -244,6 +245,14 @@ export const MainView = () => {
                     </Box>
 
                     <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
+                    <Button
+                            disabled={progress != 0.0}
+                            style={{
+                                "backgroundColor": "#449e48"
+                            }}
+                            flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => window.open("mailto:support@einfach.in")} icon="chat">
+                             <div>Share Feedback</div>
+                        </Button>
                         <Button
                             disabled={progress != 0.0}
                             style={{
@@ -270,7 +279,7 @@ export const MainView = () => {
                             <Box paddingTop={3} display="flex">
                                 <Button style={{
                                     "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                                }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); createCards(view, setProgress, rows, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment) }}>Proceed</Button>
+                                }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); createCards(view, setProgress, rows, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment, setSuccessDialog) }}>Proceed</Button>
                                 <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(false)}>Close</Button>
 
                             </Box>
@@ -289,6 +298,21 @@ export const MainView = () => {
                                     "backgroundColor": secrets.REACT_THEME_DARK_COLOR
                                 }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setErrorDialogOpen(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
                                 <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setErrorDialogOpen(false)}>Close</Button>
+                            </Box>
+                        </Dialog>
+                    )}
+                    {successDialogOpen && (
+                        <Dialog onClose={() => setSuccessDialog(true)} width="320px">
+                            <Dialog.CloseButton />
+                            <Heading><b>Your cards are ready!</b></Heading>
+                            <Text variant="paragraph">
+                                {rows} New cards have been created successfully.
+                            </Text>
+                            <Box paddingTop={3} display="flex">
+                                <Button style={{
+                                    "backgroundColor": secrets.REACT_THEME_DARK_COLOR
+                                }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setSuccessDialog(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
+                                <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setSuccessDialog(false)}>Close</Button>
                             </Box>
                         </Dialog>
                     )}

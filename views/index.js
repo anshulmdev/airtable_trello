@@ -3,15 +3,15 @@ import { globalConfig } from '@airtable/blocks';
 import React, { useState, useEffect } from 'react';
 import { MainView } from "./MainView";
 import {TrelloOAuth} from "./Dialog";
-import {setGlobalVariables} from "../controllers/globalConfig";
+import { setGlobalVariables } from "../controllers/globalConfig"
 
 function HelloWorldApp() {
     const [data, updateData] = useState(true);
     const trelloToken = globalConfig.get("trelloToken");
     useEffect(() => {
         const getData = async () => {
-            // const setInitialVariables = await setGlobalVariables();
-            // updateData(setInitialVariables);
+            const setInitialVariables = await setGlobalVariables();
+            updateData(setInitialVariables);
         }
         getData();
       }, []);
