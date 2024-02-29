@@ -6,7 +6,7 @@ var ReactDOMServer = require('react-dom/server');
 window['_airtableReact'] = React;
 window['_airtableReactDOM'] = ReactDOM;
 window['_airtableReactDOMServer'] = ReactDOMServer;
-
+window['_airtableBlockCodeVersion'] = '06ef3f44c2666518f32818975209eb0ba9888ed5';
 var didRun = false;
 window['_airtableRunBlock'] = function runBlock() {
     if (didRun) {
@@ -15,13 +15,6 @@ window['_airtableRunBlock'] = function runBlock() {
     }
     didRun = true;
     
-    var blockUrl = "https://localhost:9000";
-
-    // Make requests to local backend.
-    var baseTag = document.createElement('base');
-    baseTag.setAttribute('href', blockUrl);
-    document.head.appendChild(baseTag);
-
     // Requiring the entry point file runs user code. Be sure to do any setup
     // above this line.
     require("./../views/index.js");
