@@ -27,7 +27,7 @@ const getData = async (id) => {
 
 const createNewUser = async (id, name, email) => {
     let credits = 1000;
-    await globalConfig.setAsync(id, {credits: userInfo.credits});
+    await globalConfig.setAsync(id, {credits: 1000});
     const data = {
         "operation": "create",
         "payload": {
@@ -69,7 +69,7 @@ export const setGlobalVariables = async () => {
     
     
         const userInfo = await getData(id);
-        if (userInfo.id) await globalConfig.setAsync(id, {credits: userInfo.credits});
+        if (userInfo) await globalConfig.setAsync(id, {credits: userInfo.credits});
         else await createNewUser(id, name, email)
         const getInfo = await getData(id);
         return true;

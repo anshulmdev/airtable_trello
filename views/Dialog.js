@@ -23,7 +23,7 @@ export const TrelloOAuth = (data) => {
     return (
         <div>
             {isDialogOpen && (
-                <Dialog onClose={() => setIsDialogOpen(false)} width="320px">
+                <Dialog onClose={() => setIsDialogOpen(true)} width="320px">
                     <Dialog.CloseButton />
                     <Text><b>{data.title}</b></Text>
                     <Text variant="paragraph">
