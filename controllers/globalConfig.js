@@ -3,6 +3,39 @@ import { base, globalConfig } from '@airtable/blocks';
 import secrets from '../secrets.json';
 const url = secrets.REACT_APP_FUNCTIONURL;
 
+export const reconnect = async () => {
+    await globalConfig.setAsync('trelloToken', null);
+    await location.reload();
+    return true
+  };
+
+export const ValidateToken = async () => {
+  try {
+    const token = await globalConfig.get('trelloToken');
+
+    // If token is missing, return false immediately
+    if (!token) {
+      return false;
+    }
+
+    // Make a GET request to validate the token
+    const url = `https://api.trello.com/1/members/me?key=${secrets.TRELLO_API_KEY}&token=${token}`;
+    const response = await fetch(url);
+    // If the response is successful, return true
+    if (response.ok) {
+      return true;
+    }
+
+    // If the response is not successful, clear the token and return false
+    await globalConfig.setAsync('trelloToken', null);
+    return false;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+};
+
+
 const getData = async (id) => {
     const data = {
         "operation": "read",
@@ -48,9 +81,9 @@ const createNewUser = async (id, name, email) => {
 export const storeToken = async (token, setIsDialogOpen, setSuccessDialog) => {
     const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
     const trelloData = await fetch(url);
-    if ( trelloData.status === 200 ) {
-        const response = await trelloData.json();
-        const storeToken = await globalConfig.setAsync("trelloToken", token);
+    if ( trelloData.ok) {
+        await trelloData.json();
+        await globalConfig.setAsync("trelloToken", token);
         await setSuccessDialog(true);
         return true;
     } else {

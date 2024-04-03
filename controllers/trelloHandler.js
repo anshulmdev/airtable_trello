@@ -2,9 +2,10 @@ import {writeToTrello} from "./trelloCards"
 
 
 export const createCards = async (view, setProgress, credits, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment, setSuccessDialog) => {
-    if (!board || !list || !title) throw new Error ("Please recheck! Some fields are missing")
+    
     await setProgress(0.01);
     try {
+        if (!board || !list || !title) throw new Error ("Please recheck! Some fields are missing")
         const queryResult = view.selectRecords();
         await queryResult.loadDataAsync();
         const viewMetadata = view.selectMetadata();

@@ -13,7 +13,7 @@ export const TrelloOAuth = (data) => {
 
 
     const getToken = async () => {
-        const url = `https://trello.com/1/authorize?return_url=https://einfach-apps.tiiny.site&callback_method=fragment&scope=read,write&expiration=30days&name=Einfach - Airtable to Trello&key=da0da023dd62c5f1415a877621fabc6a&response_type=token`;
+        const url = `https://trello.com/1/authorize?return_url=https://einfach-apps.tiiny.site&callback_method=fragment&scope=read,write&expiration=never&name=Einfach - Airtable to Trello&key=da0da023dd62c5f1415a877621fabc6a&response_type=token`;
         const newwindow = window.open(url, 'name', 'height=200,width=150');
         if (window.focus) { newwindow.focus() }
         return true

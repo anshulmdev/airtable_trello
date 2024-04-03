@@ -4,33 +4,40 @@ import { Tooltip, Text, Icon, Box, Select, TablePicker, ViewPicker, Button, Dial
 import secrets from "../secrets.json";
 import { createCards } from "../controllers/trelloHandler";
 import { getBoardList, getLists, fields } from "../controllers/formFields"
+import {reconnect} from "../controllers/globalConfig";
 
 
 export const MainView = () => {
     const collaborator = base.activeCollaborators[0];
     const { id } = collaborator;
     const user = globalConfig.get(id);
-    const sample = { value: false, label: false };
     const [progress, setProgress] = useState(0.0);
     const [ErrorDialogOpen, setErrorDialogOpen] = useState(false);
     const [successDialogOpen, setSuccessDialog] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [table, setTable] = useState(base.tables[0]);
-    const [view, setView] = useState(table.views[0]);
+    const [table, setTable] = useState(base.tables[0] || null);
+    const [view, setView] = useState(table?.views[0] || null);
     globalConfig.setAsync("table", table.id);
     globalConfig.setAsync("view", view.id);
-    const [boardOptions, setBoardOptions] = useState([sample]);
-    const [listOptions, setListOptions] = useState([sample]);
+    const [boardOptions, setBoardOptions] = useState([]);
+    const [listOptions, setListOptions] = useState([]);
     const [board, setBoard] = useState('');
     const [list, setList] = useState('');
-    const [fieldOptions, setFieldOptions] = useState({ titleOptions: [sample], descriptionOptions: [sample], dateOptions: [sample], labels: [sample], attachments: [sample] });
-    const [title, setTitle] = useState(false);
-    const [desc, setDesc] = useState(false);
-    const [startDate, setStartDate] = useState(false);
-    const [endDate, setEndDate] = useState(false);
-    const [label, setLabel] = useState(false);
-    const [attachment, setAttachment] = useState(false);
+    const [fieldOptions, setFieldOptions] = useState({
+        titleOptions: [],
+        descriptionOptions: [],
+        dateOptions: [],
+        labels: [],
+        attachments: [],
+    });
+    const [title, setTitle] = useState('');
+    const [desc, setDesc] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [label, setLabel] = useState('');
+    const [attachment, setAttachment] = useState('');
     const [rows, setRows] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     const setRecord = async (update, value) => {
         if (update === "table") {
@@ -46,25 +53,26 @@ export const MainView = () => {
         }
         return true
     }
+
     const getFields = async (view) => {
         const fieldOptions = await fields(view);
         setRows(fieldOptions.rows);
         Object.keys(fieldOptions).forEach((e) => {
-            if (fieldOptions[e].length) fieldOptions[e].push({ value: false, label: false })
+            if (fieldOptions[e].length) fieldOptions[e].unshift({ value: '', label: 'Select an option' })
         })
         setFieldOptions(fieldOptions);
-        setTitle(false);
-        setDesc(false);
-        setStartDate(false);
-        setEndDate(false);
-        setLabel(false);
-        setAttachment(false);
+        setTitle('');
+        setDesc('');
+        setStartDate('');
+        setEndDate('');
+        setLabel('');
+        setAttachment('');
         return true;
     }
 
     const getList = async (boardId) => {
         const lists = await getLists(boardId);
-        setListOptions(lists);
+        setListOptions([{ value: '', label: 'Select an option' }, ...lists]);
         setList(lists[0].value);
     }
 
@@ -72,10 +80,11 @@ export const MainView = () => {
         const getBoards = async () => {
             const boardList = await getBoardList();
             const lists = await getLists(boardList[0].value);
-            setBoardOptions(boardList);
+            setBoardOptions([{ value: '', label: 'Select an option' }, ...boardList]);
             setBoard(boardList[0].value);
-            setListOptions(lists);
+            setListOptions([{ value: '', label: 'Select an option' }, ...lists]);
             setList(lists[0].value);
+            setLoading(false);
             return true
         }
 
@@ -84,27 +93,25 @@ export const MainView = () => {
 
     }, [])
 
-
     return (
         <div>
-            <Box style={{ "borderColor": secrets.REACT_THEME_DARK_COLOR, borderRadius: 5 }} border="default">
+            <Box style={{ borderColor: secrets.REACT_THEME_DARK_COLOR, borderRadius: 5 }} border="default">
                 <Box marginTop={2}>
-            {progress === 0.0 ? <div></div> : <Box marginLeft={2}><b>Progress: {parseFloat(progress).toFixed(4) * 10} %</b></Box>}
-            
-                <Box display="flex" justifyContent="flex-end" alignIt2ms="right">
-                    <Text><b>{user ? user.credits : 0}: Credits</b></Text>
-                    <Tooltip
-                        content="Einfach Application Credits to use Einfach Apps"
-                        placementX={Tooltip.placements.CENTER}
-                        placementY={Tooltip.placements.BOTTOM}
-                        shouldHideTooltipOnClick={true}
-                    >
-                        <Icon marginX={2} name="help" size={16} />
+                    {progress === 0.0 ? <div></div> : <Box marginLeft={2}><b>Progress: {parseFloat(progress).toFixed(4) * 10} %</b></Box>}
+                    <Box display="flex" justifyContent="flex-end" alignItems="right">
+                        <Text><b>{user ? user.credits : 0}: Credits</b></Text>
+                        <Tooltip
+                            content="Einfach Application Credits to use Einfach Apps"
+                            placementX={Tooltip.placements.CENTER}
+                            placementY={Tooltip.placements.BOTTOM}
+                            shouldHideTooltipOnClick={true}
+                        >
+                            <Icon marginX={2} name="help" size={16} />
+                        </Tooltip>
+                    </Box>
+                </Box>
 
-                    </Tooltip>
-                </Box></Box>
-
-                <Box style={{ 'borderStyle': 'dashed', 'borderRadius': 1, 'borderWidth': 1 }} margin={2} paddingY={2}>
+                <Box style={{ borderStyle: 'dashed', borderRadius: 1, borderWidth: 1 }} margin={2} paddingY={2}>
                     <Box display="flex" alignItems="center" paddingX={3} paddingBottom={1} paddingTop={2}>
                         <Icon name="cube" size={16} />
                         <Text flex={1} paddingLeft={1} justifyContent='flex-start'><b>Airtable Configuration</b></Text>
@@ -132,8 +139,7 @@ export const MainView = () => {
                         />
                     </Box>
                 </Box>
-                <Box style={{ 'borderStyle': 'dashed', 'borderRadius': 1, 'borderWidth': 1 }} margin={2} paddingTop={2}>
-
+                <Box style={{ borderStyle: 'dashed', borderRadius: 1, borderWidth: 1 }} margin={2} paddingTop={2}>
                     <Box display="flex" alignItems="center" paddingX={3} paddingBottom={3} paddingTop={2}>
                         <Icon name="form" size={14} />
                         <Text flex={1} paddingLeft={1} justifyContent='flex-start'><b>Trello Card Configuration</b></Text>
@@ -241,27 +247,21 @@ export const MainView = () => {
                                 width="320px"
                             />
                         </Box>
-
                     </Box>
 
                     <Box display="flex" alignItems="center" paddingX={1} paddingRight={1} marginBottom={2}>
-                    <Button
-                            disabled={progress != 0.0}
-                            style={{
-                                "backgroundColor": "#449e48"
-                            }}
-                            flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => window.open("mailto:support@einfach.in")} icon="chat">
-                             <div>Share Feedback</div>
+                        <Button
+                            disabled={progress !== 0.0}
+                            style={{ backgroundColor: "#FF0000" }}
+                            flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => reconnect()} icon="cog">
+                            <div>Reconnect Trello</div>
                         </Button>
                         <Button
-                            disabled={progress != 0.0}
-                            style={{
-                                "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                            }}
+                            disabled={progress !== 0.0}
+                            style={{ backgroundColor: secrets.REACT_THEME_DARK_COLOR }}
                             flex={1} variant="primary" marginLeft={1} marginTop={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(true)} icon="switcher">
                             {progress === 0.0 ? <div>Create Cards in Trello</div> : <div>Operation Ongoing, Please Wait....</div>}
                         </Button>
-
                     </Box>
                     <ProgressBar
                         paddingTop={2}
@@ -270,7 +270,7 @@ export const MainView = () => {
                     />
 
                     {isDialogOpen && (
-                        <Dialog onClose={() => viewRowCount(view)} width="320px">
+                        <Dialog onClose={() => setIsDialogOpen(false)} width="320px">
                             <Dialog.CloseButton />
                             <Heading>Confirm Operation</Heading>
                             <Text variant="paragraph">
@@ -278,49 +278,74 @@ export const MainView = () => {
                             </Text>
                             <Box paddingTop={3} display="flex">
                                 <Button style={{
-                                    "backgroundColor": secrets.REACT_THEME_DARK_COLOR
+                                    backgroundColor: secrets.REACT_THEME_DARK_COLOR
                                 }} marginX={1} flex={1} justifyContent='flex-start' variant="primary" onClick={() => { setIsDialogOpen(false); createCards(view, setProgress, rows, setErrorDialogOpen, board, list, title, desc, startDate, endDate, label, attachment, setSuccessDialog) }}>Proceed</Button>
                                 <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setIsDialogOpen(false)}>Close</Button>
-
                             </Box>
                         </Dialog>
                     )}
 
                     {ErrorDialogOpen && (
-                        <Dialog onClose={() => viewRowCount(view)} width="320px">
-                            <Dialog.CloseButton />
-                            <Heading>⚠️ Error in Operation</Heading>
-                            <Text variant="paragraph">
-                                {ErrorDialogOpen}
-                            </Text>
-                            <Box paddingTop={3} display="flex">
-                                <Button style={{
-                                    "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                                }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setErrorDialogOpen(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
-                                <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setErrorDialogOpen(false)}>Close</Button>
-                            </Box>
-                        </Dialog>
+                        <ErrorDialog
+                            errorMessage={ErrorDialogOpen}
+                            onClose={() => setErrorDialogOpen(false)}
+                        />
                     )}
+
                     {successDialogOpen && (
-                        <Dialog onClose={() => setSuccessDialog(true)} width="320px">
-                            <Dialog.CloseButton />
-                            <Heading><b>Your cards are ready!</b></Heading>
-                            <Text variant="paragraph">
-                                {rows} New cards have been created successfully.
-                            </Text>
-                            <Box paddingTop={3} display="flex">
-                                <Button style={{
-                                    "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                                }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { setSuccessDialog(false); window.open("mailto:support@einfach.in") }}>Email Us</Button>
-                                <Button marginX={1} flex={1} justifyContent='flex-start' onClick={() => setSuccessDialog(false)}>Close</Button>
-                            </Box>
-                        </Dialog>
+                        <SuccessDialog
+                            rowCount={rows}
+                            onClose={() => setSuccessDialog(false)}
+                        />
                     )}
                 </Box>
                 <Box display="flex" alignItems="center" padding={3} marginBottom={2}>
                 </Box>
             </Box>
 
+            {loading && <LoadingIndicator />}
         </div>
     )
 }
+
+const ErrorDialog = ({ errorMessage, onClose }) => (
+    <Dialog onClose={onClose} width="320px">
+        <Dialog.CloseButton />
+        <Heading>⚠️ Error in Operation</Heading>
+        <Text variant="paragraph">
+            {errorMessage}
+        </Text>
+        <Box paddingTop={3} display="flex">
+            <Button style={{
+                backgroundColor: secrets.REACT_THEME_DARK_COLOR
+            }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { onClose(); window.open("mailto:support@einfach.in") }}>Email Us</Button>
+            <Button marginX={1} flex={1} justifyContent='flex-start' onClick={onClose}>Close</Button>
+        </Box>
+    </Dialog>
+);
+
+const SuccessDialog = ({ rowCount, onClose }) => (
+    <Dialog onClose={onClose} width="320px">
+        <Dialog.CloseButton />
+        <Heading><b>Your cards are ready!</b></Heading>
+        <Text variant="paragraph">
+            {rowCount} New cards have been created successfully.
+        </Text>
+        <Box paddingTop={3} display="flex">
+            <Button style={{
+                backgroundColor: secrets.REACT_THEME_DARK_COLOR
+            }} variant="primary" marginX={1} flex={1} justifyContent='flex-start' onClick={() => { onClose(); window.open("mailto:support@einfach.in") }}>Email Us</Button>
+            <Button marginX={1} flex={1} justifyContent='flex-start' onClick={onClose}>Close</Button>
+        </Box>
+    </Dialog>
+);
+
+const LoadingIndicator = () => (
+    <Dialog onClose={() => setSuccessDialog(false)} width="320px">
+        <Dialog.CloseButton />
+        <b>Loading...</b>
+        <Text variant="paragraph">
+            Fetching data from Trello. Please wait...
+        </Text>
+    </Dialog>
+);

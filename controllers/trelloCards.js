@@ -41,6 +41,7 @@ const trelloPost = async (cardsData, board, list, setProgress, credits) => {
     const body = { name: element.name, desc: element.desc, start: element.start, due: element.due};
     if (element.label) body["idLabels"] = await getLabelIds(board, element.label);
     const cardReq = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if(!cardReq.ok) throw new Error(await cardReq.text())
     const cardRes = await cardReq.json();
     if (element.attachment) {
       const cardId = cardRes.id;
