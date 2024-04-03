@@ -42,7 +42,7 @@ export const TrelloOAuth = (data) => {
 
 <Button style={{
                             "backgroundColor": secrets.REACT_THEME_DARK_COLOR
-                        }} variant="primary" flex={1}  justifyContent='flex-start' onClick={() => {{ storeToken(trelloToken, setIsDialogOpen, setSuccessDialog); setIsDialogOpen(false) }}}>Store Token</Button>
+                        }} variant="primary" flex={1}  justifyContent='flex-start' onClick={() => {{ storeToken(trelloToken, setIsDialogOpen, setSuccessDialog); setIsDialogOpen(false); location.reload(); }}}>Store Token</Button>
 
                     </Box>
                 </Dialog>

@@ -79,17 +79,22 @@ const createNewUser = async (id, name, email) => {
 
 
 export const storeToken = async (token, setIsDialogOpen, setSuccessDialog) => {
-    const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
-    const trelloData = await fetch(url);
-    if ( trelloData.ok) {
+    try {
+        const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
+        const trelloData = await fetch(url);
+        if (!trelloData.ok) throw new Error(trelloData.text())
         await trelloData.json();
         await globalConfig.setAsync("trelloToken", token);
         await setSuccessDialog(true);
         return true;
-    } else {
+
+    } catch (err) {
+        console.log(err.message);
         await setIsDialogOpen(true)
         return false;
+
     }
+    
 }
 
 
