@@ -3,7 +3,7 @@ import { globalConfig } from '@airtable/blocks';
 import React, { useState, useEffect } from 'react';
 import { MainView } from "./MainView";
 import { TrelloOAuth } from "./Dialog";
-import { setGlobalVariables, ValidateToken } from "../controllers/globalConfig"
+import { setGlobalVariables, ValidateToken } from "../controllers/globalConfig";
 
 function TrelloAirtable() {
   const base = useBase();
@@ -12,14 +12,18 @@ function TrelloAirtable() {
 
   useEffect(() => {
     const fetchData = async () => {
-      await setGlobalVariables();
-      const isTokenValid = await ValidateToken();
-      if (!isTokenValid) {
-        await globalConfig.setAsync('trelloToken', null);
-        setTrelloToken(null);
-      } else {
-        const token = await globalConfig.get('trelloToken');
-        setTrelloToken(token);
+      try {
+        await setGlobalVariables();
+        const isTokenValid = await ValidateToken();
+        if (!isTokenValid) {
+          globalConfig.setAsync('trelloToken', null);
+          setTrelloToken(null);
+        } else {
+          const token = globalConfig.get('trelloToken');
+          setTrelloToken(token);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
       setIsLoading(false);
     };
@@ -29,9 +33,9 @@ function TrelloAirtable() {
 
   if (isLoading) {
     return (
-      <Box style={{ paddingTop: "100px", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box display="flex" alignItems="center" justifyContent="center" height="200px">
         <Loader scale={0.3} />
-        <p style={{ paddingLeft: "10px" }}>Please Wait....</p>
+        <Box marginLeft={2}>Please wait...</Box>
       </Box>
     );
   }
@@ -42,7 +46,7 @@ function TrelloAirtable() {
       {trelloToken ? null : (
         <TrelloOAuth
           title="Connection Issue"
-          description="Please provide Trello Token to use this Extension"
+          description="Please provide a valid Trello token to use this extension."
         />
       )}
     </div>

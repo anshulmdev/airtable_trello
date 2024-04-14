@@ -1,32 +1,28 @@
-
 import { base, globalConfig } from '@airtable/blocks';
 import secrets from '../secrets.json';
 const url = secrets.REACT_APP_FUNCTIONURL;
 
 export const reconnect = async () => {
-    await globalConfig.setAsync('trelloToken', null);
-    await location.reload();
-    return true
-  };
+  await globalConfig.setAsync('trelloToken', null);
+  await location.reload();
+  return true;
+};
 
 export const ValidateToken = async () => {
   try {
     const token = await globalConfig.get('trelloToken');
 
-    // If token is missing, return false immediately
     if (!token) {
       return false;
     }
 
-    // Make a GET request to validate the token
     const url = `https://api.trello.com/1/members/me?key=${secrets.TRELLO_API_KEY}&token=${token}`;
     const response = await fetch(url);
-    // If the response is successful, return true
+
     if (response.ok) {
       return true;
     }
 
-    // If the response is not successful, clear the token and return false
     await globalConfig.setAsync('trelloToken', null);
     return false;
   } catch (error) {
@@ -35,140 +31,141 @@ export const ValidateToken = async () => {
   }
 };
 
-
-const getData = async (id) => {
-    const data = {
-        "operation": "read",
-        "payload": {
-            "TableName": "airtable-excel",
-            "Key": { id }
-        }
-    }
+const fetchData = async (data) => {
+  try {
     const request = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify(data)
-    })
-    let response;
-    try {
-        response = await request.json();
-        return response
-    } catch (error) {
-        return error.message
-    }
-
-}
-
-const createNewUser = async (id, name, email) => {
-    let credits = 1000;
-    await globalConfig.setAsync(id, {credits: 1000});
-    const data = {
-        "operation": "create",
-        "payload": {
-            "TableName": "airtable-excel",
-            "Item" :{ id, name, email, credits}
-        }
-      }
-      const request = await fetch(url, {
-        method: "POST",
-        mode: 'no-cors',
-        body: JSON.stringify(data)
-    })
-    return request;
-}
-
-
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    const response = await request.json();
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
 
 export const storeToken = async (token, setIsDialogOpen, setSuccessDialog) => {
-    try {
-        const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
-        const trelloData = await fetch(url);
-        if (!trelloData.ok) throw new Error(trelloData.text())
-        await trelloData.json();
-        await globalConfig.setAsync("trelloToken", token);
-        await setSuccessDialog(true);
-        return true;
-
-    } catch (err) {
-        console.log(err.message);
-        await setIsDialogOpen(true)
-        return false;
-
+  try {
+    const url = `https://api.trello.com/1/members/me/boards?key=${secrets.TRELLO_API_KEY}&token=${token}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Trello API error: ${response.status} - ${errorText}`);
     }
-    
-}
-
-
-
+    await response.json();
+    await globalConfig.setAsync("trelloToken", token);
+    await setSuccessDialog(true);
+    return true;
+  } catch (error) {
+    console.error('Error storing token:', error);
+    await setIsDialogOpen(true);
+    return false;
+  }
+};
 
 export const setGlobalVariables = async () => {
-    try {
-        const collaborator = base.activeCollaborators[0];
-        const { id, email, name } = collaborator;
-    
-    
-        const userInfo = await getData(id);
-        if (userInfo) await globalConfig.setAsync(id, {credits: userInfo.credits});
-        else await createNewUser(id, name, email)
-        const getInfo = await getData(id);
-        return true;
+  try {
+    const collaborator = base.activeCollaborators[0];
+    const { id, email, name } = collaborator;
 
-    } catch(error) {
-        console.log(error);
-        return true;
+    const data = {
+      operation: "read",
+      payload: {
+        TableName: "airtable-excel",
+        Key: { id },
+      },
+    };
+    const userInfo = await fetchData(data);
+
+    if (userInfo) {
+      await globalConfig.setAsync(id, { credits: userInfo.credits });
+    } else {
+      const createData = {
+        operation: "create",
+        payload: {
+          TableName: "airtable-excel",
+          Item: { id, name, email, credits: 1000 },
+        },
+      };
+      await fetchData(createData);
+      await globalConfig.setAsync(id, { credits: 1000 });
     }
-    
-}
-
+    return true;
+  } catch (error) {
+    console.error('Error setting global variables:', error);
+    return false;
+  }
+};
 
 export const reduceCredits = async (creditsToReduce, setProgress) => {
-        const collaborator = base.activeCollaborators[0];
-        const { id } = collaborator;
-        const userInfo = await getData(id);
-        const { email, name, credits } = userInfo;
-        let NewCredits = credits - creditsToReduce;
-        await setProgress(0.1);
-        if (creditsToReduce > 100) throw new Error("The application can only transfer up to 100 records at a time. Please use filters to reduce the number of records you're trying to transfer.")
-        if (NewCredits < 0) throw new Error ("You don't have suffiecient credits for this operation. Please contact to upgrade")
-        const data = {
-            "operation": "create",
-            "payload": {
-                "TableName": "airtable-excel",
-                "Item" :{ id, name, email, credits: NewCredits}
-            }
-          }
-          const request = await fetch(url, {
-            method: "POST",
-            mode: 'no-cors',
-            body: JSON.stringify(data)
-        })
-        await setProgress(0.15);
-        await setGlobalVariables();
-        await setProgress(0.20);
-        return true;
-
-
-}
-
-export const refundCredits = async (creditsToAdd) => {
+  try {
     const collaborator = base.activeCollaborators[0];
     const { id } = collaborator;
-    const userInfo = await getData(id);
+    const data = {
+      operation: "read",
+      payload: {
+        TableName: "airtable-excel",
+        Key: { id },
+      },
+    };
+    const userInfo = await fetchData(data);
+    const { email, name, credits } = userInfo;
+    let NewCredits = credits - creditsToReduce;
+    await setProgress(0.1);
+
+    if (creditsToReduce > 100) {
+      throw new Error("The application can only transfer up to 100 records at a time. Please use filters to reduce the number of records you're trying to transfer.");
+    }
+    if (NewCredits < 0) {
+      throw new Error("You don't have sufficient credits for this operation. Please contact to upgrade.");
+    }
+
+    const updateData = {
+      operation: "create",
+      payload: {
+        TableName: "airtable-excel",
+        Item: { id, name, email, credits: NewCredits },
+      },
+    };
+    await fetchData(updateData);
+    await setProgress(0.15);
+    await setGlobalVariables();
+    await setProgress(0.2);
+    return true;
+  } catch (error) {
+    console.error('Error reducing credits:', error);
+    throw error;
+  }
+};
+
+export const refundCredits = async (creditsToAdd) => {
+  try {
+    const collaborator = base.activeCollaborators[0];
+    const { id } = collaborator;
+    const data = {
+      operation: "read",
+      payload: {
+        TableName: "airtable-excel",
+        Key: { id },
+      },
+    };
+    const userInfo = await fetchData(data);
     const { email, name, credits } = userInfo;
     let NewCredits = credits + creditsToAdd;
-    const data = {
-        "operation": "create",
-        "payload": {
-            "TableName": "airtable-excel",
-            "Item" :{ id, name, email, credits: NewCredits}
-        }
-      }
-      const request = await fetch(url, {
-        method: "POST",
-        mode: 'no-cors',
-        body: JSON.stringify(data)
-    })
+
+    const updateData = {
+      operation: "create",
+      payload: {
+        TableName: "airtable-excel",
+        Item: { id, name, email, credits: NewCredits },
+      },
+    };
+    await fetchData(updateData);
     await setGlobalVariables();
     return true;
-
-
-}
+  } catch (error) {
+    console.error('Error refunding credits:', error);
+    throw error;
+  }
+};
